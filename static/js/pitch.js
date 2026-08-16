@@ -291,35 +291,63 @@ function updateUI() {
         });
     }
 
-    // B. RENDER SELECTED ROSTER TABLE
+    // B. RENDER SELECTED ROSTER TABLE (GROUPED & ORDERED)
     const tBody = document.getElementById('squad-table-body');
     if (tBody) {
         tBody.innerHTML = '';
-        mySquad.forEach(p => {
-            const tr = document.createElement('tr');
-            tr.className = "border-b border-purple-950 hover:bg-purple-950/20";
-            const isCap = captainName === p.name;
-            const inXI = startingXI.some(x => x.name === p.name);
-            
-            const capBtnStyle = isCap 
-                ? "bg-amber-400 text-black font-black border-2 border-black shadow-[0_0_8px_#fbbf24]" 
-                : "bg-purple-900/60 text-purple-300 border border-purple-700/60 hover:border-amber-400 hover:text-amber-400";
+        
+        const positionsOrder = ['GK', 'DEF', 'MID', 'FWD'];
+        const posLabelsFull = { 'GK': 'Goalkeepers', 'DEF': 'Defenders', 'MID': 'Midfielders', 'FWD': 'Forwards' };
 
-            tr.innerHTML = `
-                <td class="py-2.5 pr-2 font-medium">
-                    <span class="text-white text-xs block truncate max-w-[130px]">${p.name}</span>
-                    <span class="text-[9px] ${inXI ? 'text-emerald-400 font-bold' : 'text-purple-400'}">[${inXI ? 'XI' : 'SUB'}] • £${p.display_price || 4.5}m</span>
-                </td>
-                <td class="text-right flex items-center justify-end gap-1.5 py-2.5 pr-1">
-                    <button class="w-6 h-6 rounded-full text-[10px] flex items-center justify-center transition-all ${capBtnStyle}" title="${isCap ? 'Unassign Captain' : 'Make Captain'}" onclick="toggleCaptain('${p.name}')">
-                        C
-                    </button>
-                    <button class="w-6 h-6 rounded-full bg-red-900/40 hover:bg-red-600 text-red-300 hover:text-white border border-red-700/60 text-xs font-black flex items-center justify-center transition-all" title="Remove Player" onclick="removeFromSquad('${p.name}')">
-                        ✕
-                    </button>
+        positionsOrder.forEach(pos => {
+            // Get all squad members for this position
+            const posSquadPlayers = mySquad.filter(x => x.pos_label === pos);
+            if (posSquadPlayers.length === 0) return;
+
+            // Separate into XI and Bench for this position
+            const xiPlayers = posSquadPlayers.filter(x => startingXI.some(s => s.name === x.name));
+            const benchPlayers = posSquadPlayers.filter(x => !startingXI.some(s => s.name === x.name));
+            const orderedPosPlayers = [...xiPlayers, ...benchPlayers];
+
+            // 1. Create a subtle position header row
+            const headerTr = document.createElement('tr');
+            headerTr.innerHTML = `
+                <td colspan="2" class="pt-3 pb-1 px-1 bg-purple-950/40 border-b border-purple-800/40">
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-wider text-purple-300">
+                        <span>${posLabelsFull[pos]}</span>
+                        <span class="bg-purple-900/80 px-1.5 py-0.5 rounded text-purple-200 border border-purple-700/50">${posSquadPlayers.length}/${totalSquadCaps[pos]}</span>
+                    </div>
                 </td>
             `;
-            tBody.appendChild(tr);
+            tBody.appendChild(headerTr);
+
+            // 2. Render each player in this position group
+            orderedPosPlayers.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-purple-950/60 hover:bg-purple-950/30 transition-colors";
+                const isCap = captainName === p.name;
+                const inXI = startingXI.some(x => x.name === p.name);
+                
+                const capBtnStyle = isCap 
+                    ? "bg-amber-400 text-black font-black border-2 border-black shadow-[0_0_8px_#fbbf24]" 
+                    : "bg-purple-900/60 text-purple-300 border border-purple-700/60 hover:border-amber-400 hover:text-amber-400";
+
+                tr.innerHTML = `
+                    <td class="py-2 pl-2 pr-1 font-medium">
+                        <span class="text-white text-xs block truncate max-w-[125px]">${p.name}</span>
+                        <span class="text-[9px] ${inXI ? 'text-emerald-400 font-bold' : 'text-purple-400'}">[${inXI ? 'XI' : 'SUB'}] • £${p.display_price || 4.5}m</span>
+                    </td>
+                    <td class="text-right flex items-center justify-end gap-1.5 py-2 pr-2">
+                        <button class="w-6 h-6 rounded-full text-[10px] flex items-center justify-center transition-all ${capBtnStyle}" title="${isCap ? 'Unassign Captain' : 'Make Captain'}" onclick="toggleCaptain('${p.name}')">
+                            C
+                        </button>
+                        <button class="w-6 h-6 rounded-full bg-red-900/40 hover:bg-red-600 text-red-300 hover:text-white border border-red-700/60 text-xs font-black flex items-center justify-center transition-all" title="Remove Player" onclick="removeFromSquad('${p.name}')">
+                            ✕
+                        </button>
+                    </td>
+                `;
+                tBody.appendChild(tr);
+            });
         });
     }
 
@@ -446,18 +474,28 @@ function createCard(p, isLarge = false) {
     const badgeFont = isLarge ? '11px' : '10px';
 
     const capBadge = (captainName === p.name) ? `
-        <div style="position: absolute !important; top: -8px !important; right: -8px !important; background-color: #fbbf24 !important; color: #000000 !important; width: ${badgeSize} !important; height: ${badgeSize} !important; border-radius: 9999px !important; border: 2px solid #000000 !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: ${badgeFont} !important; font-weight: 900 !important; z-index: 50 !important;">C</div>
+        <div style="position: absolute !important; top: -8px !important; right: -8px !important; background-color: #fbbf24 !important; color: #000000 !important; width: ${badgeSize} !important; height: ${badgeSize} !important; border-radius: 9999px !important; border: 2px solid #000000 !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: ${badgeFont} !important; font-weight: 900 !important; z-index: 50 !important;" title="Captain">C</div>
     ` : '';
     
+    // Quick remove 'X' badge appears on the opposite top-left corner if this card is currently selected for swap/action
+    let removeBadge = '';
+    if (!isLarge && selectedForSwap === p.name) {
+        removeBadge = `
+            <div onclick="event.stopPropagation(); removeFromSquad('${p.name}');" style="position: absolute !important; top: -8px !important; left: -8px !important; background-color: #dc2626 !important; color: #ffffff !important; width: 20px !important; height: 20px !important; border-radius: 9999px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 10px !important; font-weight: 900 !important; z-index: 60 !important; border: 2px solid #000000 !important; cursor: pointer !important;" title="Remove from squad">✕</div>
+        `;
+    }
+
     let warningBadge = '';
-    if (p.chance_next_round === 0 || p.status === 'i' || p.status === 's') {
-        warningBadge = `
-            <div style="position: absolute !important; top: -8px !important; left: -8px !important; background-color: #dc2626 !important; color: #ffffff !important; width: 18px !important; height: 18px !important; border-radius: 9999px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 9px !important; font-weight: 900 !important; z-index: 50 !important; border: 1.5px solid #991b1b !important;" title="${p.news || 'Ruled Out'}">✕</div>
-        `;
-    } else if (p.chance_next_round < 100) {
-        warningBadge = `
-            <div style="position: absolute !important; top: -8px !important; left: -8px !important; background-color: #f59e0b !important; color: #000000 !important; width: 18px !important; height: 18px !important; border-radius: 9999px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 9px !important; font-weight: 900 !important; z-index: 50 !important; border: 1.5px solid #b45309 !important;" title="${p.news || 'Doubtful'}">!</div>
-        `;
+    if (!removeBadge) { // Only show injury/doubt warning if not showing the remove button
+        if (p.chance_next_round === 0 || p.status === 'i' || p.status === 's') {
+            warningBadge = `
+                <div style="position: absolute !important; top: -8px !important; left: -8px !important; background-color: #dc2626 !important; color: #ffffff !important; width: 18px !important; height: 18px !important; border-radius: 9999px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 9px !important; font-weight: 900 !important; z-index: 50 !important; border: 1.5px solid #991b1b !important;" title="${p.news || 'Ruled Out'}">✕</div>
+            `;
+        } else if (p.chance_next_round < 100) {
+            warningBadge = `
+                <div style="position: absolute !important; top: -8px !important; left: -8px !important; background-color: #f59e0b !important; color: #000000 !important; width: 18px !important; height: 18px !important; border-radius: 9999px !important; display: flex !important; align-items: center !important; justify-content: center !important; font-size: 9px !important; font-weight: 900 !important; z-index: 50 !important; border: 1.5px solid #b45309 !important;" title="${p.news || 'Doubtful'}">!</div>
+            `;
+        }
     }
 
     const nameFontSize = isLarge ? '12px' : '11px';
@@ -465,6 +503,7 @@ function createCard(p, isLarge = false) {
 
     d.innerHTML = `
         ${capBadge}
+        ${removeBadge}
         ${warningBadge}
         <div style="width: 100% !important; text-align: center !important; font-size: ${nameFontSize} !important; font-weight: 900 !important; text-transform: uppercase !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; color: ${style.text} !important; line-height: 1.2 !important;">${displayWebName}</div>
         <div style="width: 65% !important; height: 1px !important; background-color: ${style.text} !important; opacity: 0.25 !important; margin: ${isLarge ? '8px' : '6px'} auto !important;"></div>
@@ -488,85 +527,119 @@ bindEvent('stat-filter', 'onchange', updateUI);
 // --- APP INITIALIZATION ---
 window.onload = init;
 
-// --- MULTI-PAGE ROUTER & PAGE 2 AI RECOMMENDATION ENGINE ---
+// --- MULTI-PAGE ROUTER & NAVIGATION ENGINE ---
+const tabHomeBtn = document.getElementById('tab-home');
 const tabBuilderBtn = document.getElementById('tab-builder');
 const tabRecBtn = document.getElementById('tab-recommended');
+const navLogo = document.getElementById('nav-logo');
+const ctaBuilder = document.getElementById('cta-builder');
+const ctaRec = document.getElementById('cta-recommendation');
+
+const pageHomeDiv = document.getElementById('page-home');
 const pageBuilderDiv = document.getElementById('page-builder');
 const pageRecDiv = document.getElementById('page-recommended');
 
-if (tabBuilderBtn && tabRecBtn && pageBuilderDiv && pageRecDiv) {
-    
-    // Page 1: Lineup Builder Tab Handler
-    tabBuilderBtn.onclick = () => {
-        pageBuilderDiv.classList.remove('hidden');
-        pageRecDiv.classList.add('hidden');
-        tabBuilderBtn.style.setProperty('background-color', '#00ff85', 'important');
-        tabBuilderBtn.style.setProperty('color', '#1e0b30', 'important');
-        tabRecBtn.style.background = 'transparent';
-        tabRecBtn.style.setProperty('color', '#b4fee7', 'important');
-    };
+function switchView(target) {
+    if (!pageHomeDiv || !pageBuilderDiv || !pageRecDiv) return;
 
-    // Page 2: AI Recommendation Tab Handler
-    tabRecBtn.onclick = async () => {
-        pageBuilderDiv.classList.add('hidden');
+    // Hide all pages
+    pageHomeDiv.classList.add('hidden');
+    pageBuilderDiv.classList.add('hidden');
+    pageRecDiv.classList.add('hidden');
+
+    // Reset button styles
+    [tabHomeBtn, tabBuilderBtn, tabRecBtn].forEach(btn => {
+        if (btn) {
+            btn.style.background = 'transparent';
+            btn.style.setProperty('color', '#d8b4fe', 'important'); // purple-300
+        }
+    });
+
+    if (target === 'home') {
+        pageHomeDiv.classList.remove('hidden');
+        if (tabHomeBtn) {
+            tabHomeBtn.style.setProperty('background-color', '#00ff85', 'important');
+            tabHomeBtn.style.setProperty('color', '#1e0b30', 'important');
+        }
+    } else if (target === 'builder') {
+        pageBuilderDiv.classList.remove('hidden');
+        if (tabBuilderBtn) {
+            tabBuilderBtn.style.setProperty('background-color', '#00ff85', 'important');
+            tabBuilderBtn.style.setProperty('color', '#1e0b30', 'important');
+        }
+    } else if (target === 'recommended') {
         pageRecDiv.classList.remove('hidden');
+        if (tabRecBtn) {
+            tabRecBtn.style.setProperty('background-color', '#00ff85', 'important');
+            tabRecBtn.style.setProperty('color', '#1e0b30', 'important');
+        }
+        triggerRecommendationLoad();
+    }
+}
+
+// Bind navigation events
+if (tabHomeBtn) tabHomeBtn.onclick = () => switchView('home');
+if (navLogo) navLogo.onclick = () => switchView('home');
+if (ctaBuilder) ctaBuilder.onclick = () => switchView('builder');
+if (ctaRec) ctaRec.onclick = () => switchView('recommended');
+if (tabBuilderBtn) tabBuilderBtn.onclick = () => switchView('builder');
+if (tabRecBtn) tabRecBtn.onclick = () => switchView('recommended');
+
+// Helper function for loading AI recommendations
+async function triggerRecommendationLoad() {
+    const aiPitchEl = document.getElementById('ai-pitch');
+    const aiBenchEl = document.getElementById('ai-bench');
+    if (!aiPitchEl || !aiBenchEl) return;
+    
+    aiPitchEl.innerHTML = '<div class="text-center text-purple-300 font-bold py-16 animate-pulse">Running Squad Optimization Solver...</div>';
+    aiBenchEl.innerHTML = '';
+
+    try {
+        const res = await fetch('/api/recommendation');
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+        const data = await res.json();
+        const lineup = data.lineup || [];
+        const bench = data.bench || [];
         
-        tabRecBtn.style.setProperty('background-color', '#00ff85', 'important');
-        tabRecBtn.style.setProperty('color', '#1e0b30', 'important');
-        tabBuilderBtn.style.background = 'transparent';
-        tabBuilderBtn.style.setProperty('color', '#b4fee7', 'important');
-        
-        const aiPitchEl = document.getElementById('ai-pitch');
-        const aiBenchEl = document.getElementById('ai-bench');
-        if (!aiPitchEl || !aiBenchEl) return;
-        
-        aiPitchEl.innerHTML = '<div class="text-center text-purple-300 font-bold py-16 animate-pulse">Running Squad Optimization Solver...</div>';
+        captainName = data.captain_name || null;
+
+        aiPitchEl.innerHTML = '';
         aiBenchEl.innerHTML = '';
 
-        try {
-            const res = await fetch('/api/recommendation');
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-
-            const data = await res.json();
-            const lineup = data.lineup || [];
-            const bench = data.bench || [];
-            
-            captainName = data.captain_name || null;
-
-            aiPitchEl.innerHTML = '';
-            aiBenchEl.innerHTML = '';
-
-            if (document.getElementById('ai-cost')) {
-                document.getElementById('ai-cost').innerText = `£${(data.total_cost || 0).toFixed(1)}m`;
-            }
-            if (document.getElementById('ai-pts')) {
-                document.getElementById('ai-pts').innerText = `${(data.total_predicted_pts || 0).toFixed(1)} Pts`;
-            }
-
-            ['GK', 'DEF', 'MID', 'FWD'].forEach(pos => {
-                const row = document.createElement('div');
-                row.className = "pos-row-lg";
-                
-                lineup.filter(x => x.pos_label === pos).forEach(player => {
-                    const card = createCard(player, true);
-                    row.appendChild(card);
-                });
-                
-                if (row.children.length > 0) {
-                    aiPitchEl.appendChild(row);
-                }
-            });
-
-            bench.forEach(player => {
-                const card = createCard(player, true);
-                aiBenchEl.appendChild(card);
-            });
-
-        } catch (err) {
-            aiPitchEl.innerHTML = `<div class="text-center text-red-400 font-bold py-16">Failed to load recommendation: ${err.message}</div>`;
-            console.error("Page 2 Fetch Error:", err);
+        if (document.getElementById('ai-cost')) {
+            document.exit = document.getElementById('ai-cost').innerText = `£${(data.total_cost || 0).toFixed(1)}m`;
         }
-    };
+        if (document.getElementById('ai-pts')) {
+            document.getElementById('ai-pts').innerText = `${(data.total_predicted_pts || 0).toFixed(1)} Pts`;
+        }
+
+        ['GK', 'DEF', 'MID', 'FWD'].forEach(pos => {
+            const row = document.createElement('div');
+            row.className = "pos-row-lg";
+            
+            lineup.filter(x => x.pos_label === pos).forEach(player => {
+                const card = createCard(player, true);
+                row.appendChild(card);
+            });
+            
+            if (row.children.length > 0) {
+                aiPitchEl.appendChild(row);
+            }
+        });
+
+        bench.forEach(player => {
+            const card = createCard(player, true);
+            aiBenchEl.appendChild(card);
+        });
+
+    } catch (err) {
+        aiPitchEl.innerHTML = `<div class="text-center text-red-400 font-bold py-16">Failed to load recommendation: ${err.message}</div>`;
+        console.error("Page 2 Fetch Error:", err);
+    }
 }
+
+// Default to Home view on initial load
+window.addEventListener('DOMContentLoaded', () => {
+    switchView('home');
+});

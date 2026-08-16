@@ -12,9 +12,32 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* CSS DESIGN TOKENS & COLOR PALETTE */
+        :root {
+            --fpl-bg: #030712;                 
+            --fpl-purple-dark: #1e0b30;        
+            --fpl-purple-card: rgba(30, 11, 48, 0.4);
+            --fpl-border: rgba(147, 51, 234, 0.3); 
+            --fpl-neon: #00ff85;               
+            --fpl-neon-glow: rgba(0, 255, 133, 0.3);
+        }
+
         /* APPLY FONT GLOBALLY AND OVERRIDE TAILWIND SANS DEFAULTS */
         body {
             font-family: 'Plus Jakarta Sans', sans-serif !important;
+            background-color: var(--fpl-bg);
+        }
+
+        /* REUSABLE UI TOKENS */
+        .fpl-glow-border {
+            border-color: var(--fpl-neon) !important;
+            box-shadow: 0 0 12px var(--fpl-neon-glow) !important;
+        }
+
+        .fpl-card-base {
+            background-color: var(--fpl-purple-card);
+            border: 1px solid var(--fpl-border);
+            backdrop-filter: blur(8px);
         }
 
         /* PITCH ROW & CARD DIMENSIONS */
@@ -79,25 +102,75 @@
     <!-- NAVIGATION HEADER -->
     <header class="bg-purple-950/80 border-b border-purple-800/50 sticky top-0 z-40 backdrop-blur-md">
         <div class="max-w-[1600px] mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
+            <!-- CLICKABLE LOGO LEADING TO HOME -->
+            <div id="nav-logo" class="flex items-center gap-3 cursor-pointer group">
                 <span class="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_12px_#34d399] animate-pulse"></span>
             
-                <h1 class="text-2xl font-black tracking-tight uppercase text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400 drop-shadow-[0_2px_8px_rgba(52,211,153,0.2)]" style="font-family: 'Outfit', sans-serif;">
+                <h1 class="text-2xl font-black tracking-tight uppercase text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-cyan-400 drop-shadow-[0_2px_8px_rgba(52,211,153,0.2)] group-hover:opacity-90 transition-opacity" style="font-family: 'Outfit', sans-serif;">
                 FPL Insights <span class="text-emerald-400 font-extrabold tracking-normal">HQ</span>
                 </h1>
             </div>
     
             <div class="flex gap-2">
-                <button id="tab-builder" class="px-4 py-2 text-xs font-black uppercase rounded-lg bg-emerald-400 text-purple-950 transition-all">Lineup Builder</button>
-                <button id="tab-recommended" class="px-4 py-2 text-xs font-black uppercase rounded-lg text-emerald-300 hover:bg-purple-900/50 transition-all">Recommendation</button>
+                <button id="tab-builder" class="px-4 py-2 text-xs font-black uppercase rounded-lg text-purple-300 hover:bg-purple-900/50 transition-all">Lineup Builder</button>
+                <button id="tab-recommended" class="px-4 py-2 text-xs font-black uppercase rounded-lg text-purple-300 hover:bg-purple-900/50 transition-all">Recommendation</button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-[1600px] mx-auto p-4">
+    <main class="max-w-[1600px] mx-auto p-4 flex flex-col gap-5">
+
+        <!-- PAGE 0: HOME / LANDING PAGE -->
+        <div id="page-home" class="flex flex-col gap-8 max-w-5xl mx-auto py-12">
+            <div class="bg-gradient-to-r from-purple-900/60 via-purple-950/40 to-slate-950 border border-purple-800/60 rounded-3xl p-8 md:p-12 relative overflow-hidden shadow-2xl text-center flex flex-col items-center gap-6">
+                <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="flex items-center gap-2">
+                    <span class="bg-emerald-400/20 text-emerald-400 border border-emerald-500/30 text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full">⚡ FPL AI Analytics Engine</span>
+                    <span class="text-xs text-purple-300 font-medium">• 2026/27 Season Ready</span>
+                </div>
+
+                <h2 class="text-4xl md:text-5xl font-black text-white tracking-tight uppercase max-w-2xl" style="font-family: 'Outfit', sans-serif;">
+                    Build Your Optimal FPL Squad with Data & AI
+                </h2>
+
+                <p class="text-sm md:text-base text-purple-200 leading-relaxed max-w-2xl">
+                    Harness machine learning regression models, real-time fixture difficulty ratings, and automated squad optimization algorithms to outsmart your mini-league rivals.
+                </p>
+
+                <!-- CALL TO ACTION BUTTONS -->
+                <div class="flex flex-wrap justify-center gap-4 mt-4">
+                    <button id="cta-builder" class="px-6 py-3.5 bg-emerald-400 hover:bg-emerald-300 text-purple-950 font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-[0_0_20px_rgba(52,211,153,0.3)]">
+                        🚀 Launch Lineup Builder
+                    </button>
+                    <button id="cta-recommendation" class="px-6 py-3.5 bg-purple-900/80 hover:bg-purple-800 text-emerald-300 border border-purple-700 font-black text-xs uppercase tracking-wider rounded-xl transition-all">
+                        🤖 View AI Recommendations
+                    </button>
+                </div>
+            </div>
+
+            <!-- FEATURE HIGHLIGHT CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-purple-950/30 border border-purple-800/50 p-5 rounded-2xl flex flex-col gap-2">
+                    <span class="text-emerald-400 text-lg font-black">📊</span>
+                    <h4 class="text-sm font-bold text-white uppercase">Advanced Metrics</h4>
+                    <p class="text-xs text-purple-300 leading-relaxed">Filter players using deep analytics including xG, xA, xGI, ICT Index, and BPS.</p>
+                </div>
+                <div class="bg-purple-950/30 border border-purple-800/50 p-5 rounded-2xl flex flex-col gap-2">
+                    <span class="text-emerald-400 text-lg font-black">⚽</span>
+                    <h4 class="text-sm font-bold text-white uppercase">Interactive Pitch</h4>
+                    <p class="text-xs text-purple-300 leading-relaxed">Visualize your starting XI, manage substitutes, and track real-time remaining budgets.</p>
+                </div>
+                <div class="bg-purple-950/30 border border-purple-800/50 p-5 rounded-2xl flex flex-col gap-2">
+                    <span class="text-emerald-400 text-lg font-black">🤖</span>
+                    <h4 class="text-sm font-bold text-white uppercase">AI Optimization</h4>
+                    <p class="text-xs text-purple-300 leading-relaxed">Instantly generate squad recommendations tailored to maximize predicted total points.</p>
+                </div>
+            </div>
+        </div>
 
         <!-- PAGE 1: LINEUP BUILDER -->
-        <div id="page-builder" class="flex flex-col gap-5">
+        <div id="page-builder" class="hidden flex flex-col gap-5">
             
             <!-- STATS SUMMARY BANNER (COUNTDOWN BUDGET) -->
             <div class="bg-purple-950/40 border border-purple-800/50 p-4 rounded-xl flex justify-between items-center">
