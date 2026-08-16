@@ -11,7 +11,7 @@ A data-driven Fantasy Premier League squad builder and analytics tool that helps
 * **AI Roster Recommendations-** Get intelligent squad suggestions optimised for predicted total points within your remaining budget.
 * **Advanced Player Filtering-** Filter by position, team, price ceiling, and sort by 15+ statistical categories.
 * **Comprehensive Stats-** Access xG, xA, xGI, xGC, ICT Index, Influence, Creativity, Threat, BPS, form rating, clean sheets, and more.
-* **Informed Scouting-** Identify set-piece monsters and penalty takers directly from the player selection panel without needing to cross-reference external data sources. Player cards on the selection panel highlights set-piece responsibilities using intuitive badges:
+* **Informed Scouting-** Identify penalty takers, free-kick specialists, and corner takers directly from the player panel via intuitive badges, no external cross-referencing needed.
 
    - ⚽ Penalty Taker
    - 🎯 Free-Kick Taker
@@ -35,18 +35,18 @@ A data-driven Fantasy Premier League squad builder and analytics tool that helps
 
 ---
 
-## How it Works
+## ⚙️ How it Works
 
 * **Browse Players-** Use the filters to search by position, team or price range and sort by your preferred stat
 * **Build your Squad-** Add up to 15 players while staying within the £100m budget.
-* **Get Recommendations-** Click the Recommendations tab to receive an AI optimized squad based on current form and projected points.
+* **Get Recommendations-** Click the Recommendation tab to receive an AI-optimized squad based on current form and projected points.
 * **Manage Substitutes-** Designate your bench players and lock in your final selection.
 
 ---
 
-## Data & Statistics Covered
+## 📊 Data & Statistics Covered
 
-Player pricing, fixture details and performance metrics are pulled directly from the official FPL API and processed dynamically:
+Player pricing, fixture details and performance metrics are pulled directly from the [FPL Core Insights](https://github.com/olbauday/FPL-Core-Insights) and processed dynamically:
 
 * **Attacking Metrics-** Goals, Assists, xG, xA, xGI, Creativity, Threat
 * **Defensive Metrics-** xGC, Clean Sheets, Saves
