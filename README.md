@@ -11,6 +11,12 @@ A data-driven Fantasy Premier League squad builder and analytics tool that helps
 * **AI Roster Recommendations-** Get intelligent squad suggestions optimised for predicted total points within your remaining budget.
 * **Advanced Player Filtering-** Filter by position, team, price ceiling, and sort by 15+ statistical categories.
 * **Comprehensive Stats-** Access xG, xA, xGI, xGC, ICT Index, Influence, Creativity, Threat, BPS, form rating, clean sheets, and more.
+* **Informed Scouting-** Identify set-piece monsters and penalty takers directly from the player selection panel without needing to cross-reference external data sources. Player cards on the selection panel highlights set-piece responsibilities using intuitive badges:
+
+   - ⚽ Penalty Taker
+   - 🎯 Free-Kick Taker
+   - 🚩 Corner Taker
+   
 * **Live Budget Tracking-** Real-time remaining budget and squad value validation with overspend warnings.
 * **Expected Points Projection-** See predicted total points update dynamically as you build your squad.
 * **Substitute Management-** Manage your bench alongside your starting XI with full squad overview.
